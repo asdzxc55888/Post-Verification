@@ -5,41 +5,51 @@ from common.helpers import getFilesPath
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor, fasterrcnn_resnet50_fpn
 import torchvision.transforms as trns
 from PIL import Image
+import torchvision.io as torch_io
+import pandas as pd
+from os import path
+from tqdm import tqdm
 import cv2
 
-class generateImageInfo:
+class generateVideoInfo:
     def __init__(self, media_path):
         self.media_path = media_path
-        self.model = fasterrcnn_resnet50_fpn(pretrained=True)
+        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
 
     def __getVideoFrames(video_path):
         cap = cv2.VideoCapture(video_path)
-        result = []
+        frames = []
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
-
-            frame_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            transform = trns.ToTensor()
-            frame_image = transform(frame_image)
-            result.append(frame_image)
+            frames.append(frame)
         cap.release()
-        return result
+        return frames
 
     def __predictVideoBboxes(self, video_frames):
-        bboxes = []
-        outputs = self.model(video_frames)
-        for index in range(len(outputs)):
-            outputs_np = {k: v.detach().numpy() for k, v in outputs[index].items()}
-            for i, (bbox, label, score) in enumerate(zip(outputs_np["boxes"], outputs_np["labels"], outputs_np["scores"])):
-                if label == 1 and score > 0.8:
-                    bboxes.append(bbox)
+        result = None
+        batch_size = 100
+        df= pd.DataFrame({})
+# print(frames)
+        for epoch in tqdm(range(round(len(video_frames)/batch_size + 1))):
+            start_index = epoch * batch_size
+            end_index = epoch * batch_size + batch_size
+            result = self.model(video_frames[start_index:end_index])
+    
+            for i in range(len(result.pandas().xyxy)):
+                singalDf = result.pandas().xyxy[i]
+                singalDf['framesKey'] = i + start_index
+                df = df.append(singalDf)
 
-        return bboxes
+        isOverBaseConfidence = df["confidence"] > 0.7
+        isPersonClass = df["class"] == 0
+        df = df[(isOverBaseConfidence & isPersonClass )]
 
-    def generateVideoInfo(self, result_path):
-        files_path = getFilesPath(self.media_path, 'mp4')
+        return df.drop(['confidence', 'class', 'name'], axis=1).to_numpy()
+
+    def generateVideoInfo(self, video_file_name):
+        files_path = getFilesPath(path.join(self.media_path, video_file_name), 'mp4')
         
         videos_bboxes = []
         for file_path in files_path:
