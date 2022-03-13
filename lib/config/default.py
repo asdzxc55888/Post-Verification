@@ -26,11 +26,18 @@ _C.AUTO_RESUME = False
 _C.PIN_MEMORY = True
 _C.RANK = 0
 
+# Keypoint annotation
+_C.ARM_INDEX = [5,6,7,8,9,10]
+_C.LEG_INDEX = [11,12,13,14,15,16]
+
 # Data info
 _C.VIDEO_PATH = os.path.join('data','medias')
 _C.BBOX_INFO_PATH = os.path.join('outputs', 'boxes_info')
 _C.KEYPOINT_RESULT_PATH = os.path.join('outputs', 'keypoint_results')
 _C.OUTPUT_VIDEO_PATH = os.path.join('outputs', 'video_results')
+_C.FPS = 24
+_C.DOWNSAMPLING = 2
+_C.MOVING_AVERAGE_TIME_PERIOD = _C.FPS/_C.DOWNSAMPLING*5
 
 # Cudnn related params
 _C.CUDNN = CN()

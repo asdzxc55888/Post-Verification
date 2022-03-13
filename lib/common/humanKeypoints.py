@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.core.fromnumeric import var
 import pandas as pd
 import os
 
@@ -10,12 +9,13 @@ CORRELATION_PARENT = [None, 0, 0, 0, 0, 0, 0, 5, 6, 5, 6, 0, 0, 11, 12, 11, 12]
 LIMBS_LEFT_INDEX = [7, 9, 13, 15]
 LIMBS_RIGHT_INDEX = [8, 10, 14, 16]
 
-NOISE_THRESHOLD = 1.5
+NOISE_THRESHOLD = 1.2
 
 
 class humanKeypoints:
     def __init__(self, video_name) -> None:
         self.__video_name = video_name
+        self.__milestone = int(str.split(video_name.split('.')[0], "_")[1])
         self.__keypoints_df = self.__initKeypoints()
         self.__origin_keypoints_df = self.__initKeypoints()
         self.__normalizeKeypoints()
@@ -107,6 +107,12 @@ class humanKeypoints:
         return np.max(distance, axis=0)
 
     def getNoiseFrames(self, threshold) -> list:
+        '''
+        Get frame index of video which predicted error.
+        Return
+        ---
+        noise_frame : `int` list
+        '''
         variablility = self.getKeypointVariability(isRemoveNoise=False)
         v_sum = np.sum(variablility, axis=1)
         return v_sum > threshold
@@ -118,6 +124,14 @@ class humanKeypoints:
         video_name: video name of keypoints.
         '''
         return self.__video_name
+
+    def getMilestone(self):
+        '''
+        Return
+        ---
+        milestion: `int` milestone of infant.
+        '''
+        return self.__milestone
 
     def getKeypoints(self, isNormalize=True) -> pd.DataFrame:
         '''
@@ -138,7 +152,7 @@ class humanKeypoints:
 
         Return
         ---
-        variability : float or ndarray
+        variability : `float` ndarray
         '''
         result = np.linalg.norm(np.diff(self.__correlations, axis=0), axis=2)
         if self.__noise_frames is not None and isAddedVertical:
@@ -172,15 +186,11 @@ class humanKeypoints:
         '''
         result = []
         variability = self.getKeypointVariability()
-        for frame_index in range(variability.shape[0]):
-            keypoint_variability_av = []
-            for i in range(variability.shape[1]):
-                start_index = frame_index-eachAverageTime
-                if start_index < 0:
-                    start_index = 0
-                division = frame_index+1 - start_index
-                keypoint_variability_av.append(
-                    np.sum(variability[start_index:frame_index+1][..., i])/division)
-            result.append(keypoint_variability_av)
+        for joint_index in range(variability.shape[1]):
+            single_result = np.convolve(variability[..., joint_index], np.ones(eachAverageTime), 'valid') / eachAverageTime
+            result.append(single_result)
         result = np.asarray(result)
         return result
+
+    def getFeature(self):
+        return None

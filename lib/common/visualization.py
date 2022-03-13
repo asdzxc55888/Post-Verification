@@ -82,7 +82,7 @@ class visualization:
                 frames[singal_result['framesKey']], cv2.COLOR_BGR2RGB)
             out.write(frame)
 
-    def draw_average_movement(self, start_frame: int = 0, end_frame: int = 0, title: str = 'Average movement', eachAverageTime: int = 72) -> None:
+    def draw_average_movement(self, start_frame: int = 0, end_frame: int = 0, title: str = 'Average movement', eachAverageTime: int = 24) -> None:
         '''
         draw average movement chart.
 
@@ -95,7 +95,7 @@ class visualization:
 
         average_movement = self.__keypoints.getAverageMovement(eachAverageTime)
         
-        final_frame = self.__keypoints.getKeypoints().shape[0] - 1
+        final_frame = self.__keypoints.getKeypoints().shape[0] - eachAverageTime
         if end_frame == 0 or end_frame > final_frame:
             end_frame = final_frame
         if start_frame < 0 or start_frame > final_frame:
@@ -105,15 +105,19 @@ class visualization:
 
         fig, ax = plt.subplots()
         ax.set_title(title)
-        range_average_movement = average_movement[start_frame:end_frame]
-        ax.plot(x, range_average_movement[..., 9] +
-                range_average_movement[..., 7], lw=2, label='left hand')
-        ax.plot(x, range_average_movement[..., 10] +
-                range_average_movement[..., 8], lw=2, label='right hand')
-        ax.plot(x, range_average_movement[..., 15] +
-                range_average_movement[..., 13], lw=2, label='left foot')
-        ax.plot(x, range_average_movement[..., 16] +
-                range_average_movement[..., 14], lw=2, label='right foot')
+        range_average_movement = average_movement[..., start_frame:end_frame]
+        # ax.plot(x, range_average_movement[9] +
+        #         range_average_movement[7], lw=2, label='left hand')
+        # ax.plot(x, range_average_movement[10] +
+        #         range_average_movement[8], lw=2, label='right hand')
+        # ax.plot(x, range_average_movement[15] +
+        #         range_average_movement[13], lw=2, label='left foot')
+        # ax.plot(x, range_average_movement[16] +
+        #         range_average_movement[14], lw=2, label='right foot')
+        # ax.plot(x, range_average_movement[9], lw=2, label='keypoint 9')
+        # ax.plot(x, range_average_movement[10], lw=2, label='keypoint 10')
+        # ax.plot(x, range_average_movement[15], lw=2, label='keypoint 15')
+        ax.plot(x, range_average_movement[16], lw=2, label='keypoint 16')
         plt.legend()
         plt.show()
 

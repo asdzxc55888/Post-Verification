@@ -1,4 +1,3 @@
-from cgi import print_directory
 import os
 import numpy as np
 import pandas as pd
@@ -7,7 +6,6 @@ import torch.nn.parallel
 from tqdm import tqdm
 import torch.backends.cudnn as cudnn
 
-import models
 from config import cfg
 from dataloader.VideosInfoLoader import VideosInfoLoader
 from utils.osutils import mkdir_p, isdir
@@ -20,15 +18,15 @@ class keypointPredictor:
     Predicting keypoint of infant video
     '''
 
-    def __init__(self, __video_name) -> None:
+    def __init__(self, video_name) -> None:
         self.__model = self.__initModel()
-        self.__video_name = __video_name
-        self.__video_loader = torch.utils.data.DataLoader(VideosInfoLoader(cfg, __video_name),
+        self.__video_name = video_name
+        self.__video_loader = torch.utils.data.DataLoader(VideosInfoLoader(cfg, video_name),
                                                           batch_size=cfg.TEST.BATCH_SIZE_PER_GPU, shuffle=False, num_workers=cfg.WORKERS,
                                                           pin_memory=True)
 
     def __initModel(self) -> None:
-        cudnn.benchmark = cfg.CUDNN.BENCHMARK
+        cudnn.benchmark = cfg.CUDNN.BENCHMARK 
         torch.backends.cudnn.deterministic = cfg.CUDNN.DETERMINISTIC
         torch.backends.cudnn.enabled = cfg.CUDNN.ENABLED
         
