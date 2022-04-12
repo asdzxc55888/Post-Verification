@@ -155,6 +155,32 @@ class visualization:
         plt.legend()
         plt.show()
 
+    def draw_peak_feature(self, features_df, visualize_data, video_name):
+        COLOR = ['red', 'orange', 'gold', 'magenta', 'green', 'turquoise','deepskyblue', 'indigo', 'black', 'pink']
+        fig, ax = plt.subplots(3,4,figsize=(30, 15))
+
+        for i, data in enumerate(visualize_data):
+            joint_index = data['joint_index']
+            segment = data['segment']
+            peak = data['peak']
+            moving_average = data['moving_average']
+
+            ma_range = np.arange(moving_average.shape[0])
+            clusters = features_df[(features_df['joint_index'] == joint_index) & (features_df['video_name'] == video_name)]
+
+            row = int(i/4)
+            col = i%4
+            ax[row][col].set_title(joint_index)
+            for j, s in enumerate(segment): 
+                segment_range = np.arange(s[0], s[1])
+                peakCluster = clusters["peakCluster"].iloc[j]
+                ax[row][col].plot(segment_range, moving_average[segment_range], COLOR[peakCluster]); 
+            # ax[row][col].plot(peak, moving_average[peak], "xr")
+            ax[row][col].plot(segment, moving_average[segment], "dr"); 
+            ax[row][col].plot(moving_average, 'black', alpha = 0.3); 
+            # ax[row][col].legend(['peak'])
+            ax[row][col].legend(['segment'])
+
     def __draw_pose(self, keypoints, img):
         """draw the keypoints and the skeletons.
         :params keypoints: the shape should be equal to [17,2]

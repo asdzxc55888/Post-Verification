@@ -35,9 +35,9 @@ _C.VIDEO_PATH = os.path.join('data','medias')
 _C.BBOX_INFO_PATH = os.path.join('outputs', 'boxes_info')
 _C.KEYPOINT_RESULT_PATH = os.path.join('outputs', 'keypoint_results')
 _C.OUTPUT_VIDEO_PATH = os.path.join('outputs', 'video_results')
-_C.FPS = 24
+_C.FPS = 72
 _C.DOWNSAMPLING = 2
-_C.MOVING_AVERAGE_TIME_PERIOD = _C.FPS/_C.DOWNSAMPLING*5
+_C.MOVING_AVERAGE_TIME_PERIOD = _C.FPS/_C.DOWNSAMPLING*3
 
 # Cudnn related params
 _C.CUDNN = CN()

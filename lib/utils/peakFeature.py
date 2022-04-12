@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.signal import find_peaks
+from scipy.special import softmax
+from scipy.stats import skew
 
 from config import cfg
 
@@ -36,7 +38,7 @@ class peakFeature:
         return result
 
     def __removedMovingAverageNoise(self, low_standard, moving_average) -> np.ndarray:
-        checkRange = int(cfg.MOVING_AVERAGE_TIME_PERIOD)
+        checkRange = int(cfg.MOVING_AVERAGE_TIME_PERIOD/2)
 
         result = []
         for i, ma in enumerate(moving_average):
@@ -56,12 +58,16 @@ class peakFeature:
         for i, ma in enumerate(moving_average):
             if round(ma, 10) != ls and start == None:
                 start = i
-            elif round(ma, 10) == ls and end == None and start != None:
+            elif (round(ma, 10) == ls and end == None and start != None) or (start != None and i == moving_average.shape[0] - 1):
                 end = i
 
             if start != None and end != None:
-                is_smaller_sampling_range = end - start < cfg.MOVING_AVERAGE_TIME_PERIOD/2
+                is_smaller_sampling_range = end - start < cfg.MOVING_AVERAGE_TIME_PERIOD/4
                 if not is_smaller_sampling_range:
+                    if start - 1 > 0:
+                        start -= 1
+                    if end < moving_average.shape[0] - 1:
+                        end += 1
                     result.append([start, end])
                 start, end = None, None
         return np.array(result)
@@ -123,7 +129,7 @@ class peakFeature:
 
     def __getSegmentPeakNum(self, peaks, segment) -> np.ndarray:
         result = []
-        for start, end in segment:
+        for start, end in segment: 
             target = peaks[peaks >= start]
             target = target[target <= end]
             result.append(target.shape[0])
@@ -136,11 +142,15 @@ class peakFeature:
             features_tuple = {
                 "acceleration": self.getAcceleration(moving_average, peak, segment),
                 "deceleration": self.getDeceleration(moving_average, peak, segment),
-                "movment_duration": list(map(lambda i: segment[i][1] - segment[i][0], np.arange(segment.shape[0]))),
+                "movment_duration": softmax(list(map(lambda i: segment[i][1] - segment[i][0], np.arange(segment.shape[0])))),
                 "mean": self.__computeEachSegment(moving_average, segment, np.mean),
+                "max": self.__computeEachSegment(moving_average, segment, np.max),
                 "std": self.__computeEachSegment(moving_average, segment, np.std),
-                "peaks_num": self.__getSegmentPeakNum(peak, segment)
+                "skew": abs(self.__computeEachSegment(moving_average, segment, skew)),
+                "peaks_num": softmax(self.__getSegmentPeakNum(peak, segment))
             }
+            if features_tuple["acceleration"].shape[0] != segment.shape[0]:
+                assert "difference size"
             for i in range(features_tuple["acceleration"].shape[0]):
                 feature = {
                     "video_name": self.__video_name,
@@ -150,8 +160,24 @@ class peakFeature:
                     "movment_duration": features_tuple["movment_duration"][i],
                     "mean": features_tuple["mean"][i],
                     "std": features_tuple["std"][i],
+                    "max": features_tuple["max"][i],
+                    "skew": features_tuple["skew"][i],
                     "peaks_num": features_tuple["peaks_num"][i]
                 }
                 peakFeatures.append(feature)
             index += 1
         return peakFeatures
+
+    def getVisualizeData(self):
+        datas = []
+        joint_index = 5
+        for moving_average, peak, segment in zip(self.__all_moving_average, self.__peaks, self.__segments):
+            data = {
+                "joint_index": joint_index,
+                "moving_average": moving_average,
+                "peak": peak,
+                "segment": segment
+            }
+            joint_index += 1
+            datas.append(data)
+        return datas
