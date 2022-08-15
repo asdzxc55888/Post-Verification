@@ -5,6 +5,7 @@ import torch
 import torch.nn.parallel
 from tqdm import tqdm
 import torch.backends.cudnn as cudnn
+import models
 
 from config import cfg
 from dataloader.VideosInfoLoader import VideosInfoLoader

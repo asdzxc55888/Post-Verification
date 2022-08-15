@@ -71,7 +71,8 @@ class visualization:
                               (int(vidcap.get(3)), int(vidcap.get(4))))
         for i in tqdm(np.arange(start_frame, end_frame)):
 
-            if noise_frame[i]:
+            if show_noise and noise_frame[i]:
+                print("1")
                 continue
 
             singal_result = self.__keypoints_df.iloc[i]
