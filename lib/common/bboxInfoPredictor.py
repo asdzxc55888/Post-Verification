@@ -38,9 +38,9 @@ class bboxInfoPredictor:
         self.__video_name = video_name
         self.video_path = os.path.join(cfg.VIDEO_PATH, video_name)
         self.batch_size = batch_size
-        # self.frames = self.__getVideoFrames()
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
             pretrained=True)
+        print(CTX)
         self.model.to(CTX)
         self.threshold = threshold
 
@@ -71,10 +71,7 @@ class bboxInfoPredictor:
 
         full_result = []
         self.model.eval()
-        # for epoch in tqdm(range(floor(len(self.frames)/batch_size + 1))):
         for index in tqdm(range(len(frames))):
-            # start_index = epoch * batch_size
-            # end_index = epoch * batch_size + batch_size
             frame_np = np.array(frames[index])
             img_tensor = torch.from_numpy(
                 frame_np/255.).permute(2, 0, 1).float().to(CTX)
@@ -99,11 +96,6 @@ class bboxInfoPredictor:
                         single_result["boxes"] = box
                         full_result.append(single_result)
                         break
-
-            # for i in range(len(result.pandas().xyxy)):
-            #     singalDf = result.pandas().xyxy[i]
-            #     singalDf['framesKey'] = i + start_index
-            #     df = df.append(singalDf)
 
         result_df = pd.DataFrame(full_result, columns=[
             'framesKey', 'boxes'])

@@ -1,12 +1,8 @@
 import os
 import numpy as np
-import json
-import random
 import cv2
 
-import torch
 import torch.utils.data as data
-import torchvision
 import torchvision.transforms as transforms
 import pandas as pd
 
