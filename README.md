@@ -29,7 +29,7 @@
 │   └── VideoInfoLoader.py //讀取影片預測box info資訊
 │   
 ├── lib
-│   ├── common //存
+│   ├── common 
 │       ├── bboxInfoPredictor.py //輸入影片輸出影片box位置
 │       ├── keypointPredictor.py //輸入影片與影片box位置輸出關節點位置
 │       ├── humanKeypoints.py //讀取已預測後的關節點資料
@@ -42,11 +42,12 @@
 │   ├── boxes_info        //預測box info檔案存放資料夾
 │   ├── keypoint_results  //關節點預測結果
 │   └── video_results     //附帶關節點的影片輸出結果
-└── demo.ipn
+├── feature_test.ipynb // 特徵篩選(未完成) 
+└── demo.ipynb //前處理流程
 ```
 
 ## 參考
-[FASTERRCNN_RESNET50_FPN](https://pytorch.org/vision/main/models/generated/torchvision.models.detection.fasterrcnn_resnet50_fpn.html)
-[Deep High-Resolution Representation Learning
+* [FASTERRCNN_RESNET50_FPN](https://pytorch.org/vision/main/models/generated/torchvision.models.detection.fasterrcnn_resnet50_fpn.html)
+* [Deep High-Resolution Representation Learning
 for Visual Recognition](https://arxiv.org/pdf/1908.07919.pdf)
-[HRNet-Human-Pose-Estimation](https://github.com/HRNet/HRNet-Human-Pose-Estimation)
+* [HRNet-Human-Pose-Estimation](https://github.com/HRNet/HRNet-Human-Pose-Estimation)
